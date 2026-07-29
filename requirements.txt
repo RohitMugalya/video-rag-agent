@@ -19,3 +19,4 @@ easyocr
 torch
 einops
 ftfy
+timm
