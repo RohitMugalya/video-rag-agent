@@ -1,0 +1,1 @@
+<!-- Agent system prompt placeholder. Fill in orchestration rules here: locate-then-drill-down pattern, video_id discipline, escalation logic (zero_shot -> verify_visual_claim / describe_visual_attribute), multi-instance handling, etc. -->
