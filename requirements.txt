@@ -1,4 +1,3 @@
-spaces
 python-dotenv
 langchain
 langchain-core
@@ -16,7 +15,6 @@ numpy
 faster-whisper==1.2.1
 av==12.3.0
 easyocr
-torch
 einops
 ftfy
 timm
