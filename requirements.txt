@@ -8,7 +8,7 @@ langchain-community
 langchain-groq
 langchain-nvidia-ai-endpoints
 langchain-openai
-transformers<5
+transformers==4.41.2
 accelerate
 huggingface_hub
 opencv-python-headless
