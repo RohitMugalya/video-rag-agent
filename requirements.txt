@@ -14,6 +14,7 @@ huggingface_hub
 opencv-python-headless
 pillow
 numpy
-faster-whisper
+faster-whisper==1.2.1
+av==12.3.0
 easyocr
 torch
