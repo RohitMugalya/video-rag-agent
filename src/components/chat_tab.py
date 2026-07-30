@@ -66,7 +66,7 @@ def _build_agent_response(message, history, llm_provider, llm_model, vlm_provide
         ]
         updated_trace = _format_chat_trace(message, collector.events, trace_text)
         retry_message = ""
-        retry_button_state = gr.Button.update(interactive=False)
+        retry_button_state = gr.update(interactive=False)
     except Exception as e:
         error_name = type(e).__name__
         error_message = str(e)
@@ -78,7 +78,7 @@ def _build_agent_response(message, history, llm_provider, llm_model, vlm_provide
         ]
         updated_trace = _format_chat_trace(message, collector.events, trace_text)
         retry_message = message
-        retry_button_state = gr.Button.update(interactive=True)
+        retry_button_state = gr.update(interactive=True)
 
     return history, "", updated_trace, retry_message, retry_button_state
 
@@ -89,5 +89,5 @@ def chat_respond(message, history, llm_provider, llm_model, vlm_provider, vlm_mo
 
 def retry_response(history, retry_message, llm_provider, llm_model, vlm_provider, vlm_model, trace_text, request: gr.Request):
     if not retry_message:
-        return history, "", trace_text, "", gr.Button.update(interactive=False)
+        return history, "", trace_text, "", gr.update(interactive=False)
     return _build_agent_response(retry_message, history, llm_provider, llm_model, vlm_provider, vlm_model, trace_text, request)
