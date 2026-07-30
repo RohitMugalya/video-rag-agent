@@ -14,6 +14,15 @@ def load_siglip():
     return _MODEL_CACHE["siglip"]
 
 
+def run_with_gpu_fallback(gpu_fn, cpu_fn):
+    try:
+        return gpu_fn(), False
+    except RuntimeError as e:
+        if "No CUDA GPUs are available" in str(e):
+            return cpu_fn(), True
+        raise
+
+
 def load_ocr():
     if "ocr" not in _MODEL_CACHE:
         import easyocr

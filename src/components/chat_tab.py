@@ -14,7 +14,7 @@ class TraceCollector(BaseCallbackHandler):
 
     def on_tool_end(self, output, **kwargs):
         if self.events:
-            self.events[-1]["output"] = str(output)
+            self.events[-1]["output"] = output
 
     def on_tool_error(self, error, **kwargs):
         if self.events:
@@ -27,7 +27,13 @@ def _format_turn_trace(query, events):
     else:
         parts = []
         for e in events:
-            parts.append(f"**{e['tool']}**\n\nInput: `{e['input']}`\n\nOutput: `{e['output']}`")
+            output = e["output"]
+            output_note = ""
+            if isinstance(output, dict) and output.get("ran_on_cpu"):
+                output_note = "⚠️ GPU unavailable — ran on CPU (slower).\n\n"
+            parts.append(
+                f"**{e['tool']}**\n\nInput: `{e['input']}`\n\n{output_note}Output: `{output}`"
+            )
         body = "\n\n---\n\n".join(parts)
     return f"#### \"{query}\"\n\n{body}"
 
@@ -59,6 +65,12 @@ def _build_agent_response(message, history, llm_provider, llm_model, vlm_provide
             config={"callbacks": [collector]},
         )
         answer = result["messages"][-1].content
+        tool_cpu_fallback = any(
+            isinstance(e["output"], dict) and e["output"].get("ran_on_cpu")
+            for e in collector.events
+        )
+        if tool_cpu_fallback:
+            answer = f"{answer}\n\n_(Note: GPU was unavailable for part of this answer, so it ran on CPU and may have taken longer.)_"
 
         history = (history or []) + [
             {"role": "user", "content": message},
