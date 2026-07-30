@@ -11,7 +11,7 @@ import gradio as gr
 
 from core.models import warm_up_models
 from src.components.audio_guide import render_audio_guide
-from src.components.chat_tab import chat_respond, render_chat_components
+from src.components.chat_tab import chat_respond, render_chat_components, retry_response
 from src.components.library_tab import render_library_tab
 from src.components.sidebar import render_sidebar
 from src.components.trace_tab import render_trace_tab_components
@@ -31,7 +31,7 @@ with gr.Blocks(title="Video-RAG Agent") as demo:
         with gr.Column(scale=3):
             with gr.Tabs():
                 with gr.Tab("Chat"):
-                    chatbot, msg = render_chat_components()
+                    chatbot, msg, retry_button, retry_state = render_chat_components()
                 with gr.Tab("Tool Trace"):
                     trace_output = render_trace_tab_components()
                 with gr.Tab("Video Library"):
@@ -40,7 +40,13 @@ with gr.Blocks(title="Video-RAG Agent") as demo:
     msg.submit(
         chat_respond,
         inputs=[msg, chatbot, llm_provider, llm_model, vlm_provider, vlm_model, trace_output],
-        outputs=[chatbot, msg, trace_output],
+        outputs=[chatbot, msg, trace_output, retry_state, retry_button],
+    )
+
+    retry_button.click(
+        retry_response,
+        inputs=[chatbot, retry_state, llm_provider, llm_model, vlm_provider, vlm_model, trace_output],
+        outputs=[chatbot, msg, trace_output, retry_state, retry_button],
     )
 
 if __name__ == "__main__":
