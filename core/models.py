@@ -10,7 +10,7 @@ def load_siglip():
         model = AutoModel.from_pretrained("google/siglip2-base-patch16-224").eval()
         model = model.to("cuda")
         processor = AutoProcessor.from_pretrained("google/siglip2-base-patch16-224")
-        _MODEL_CACHE["siglip"] = (model, processor)
+        _MODEL_CACHE["siglip"] = (model, processor, "cuda")
     return _MODEL_CACHE["siglip"]
 
 

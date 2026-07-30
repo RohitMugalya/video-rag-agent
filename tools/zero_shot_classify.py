@@ -10,15 +10,15 @@ from core.video_io import extract_frames
 
 @spaces.GPU(duration=30)
 def _zero_shot_classify(video_id: str, timestamp: float, labels: list, is_range_end: float = None) -> dict:
-    model, processor = load_siglip()
+    model, processor, device = load_siglip()
     target_ts = timestamp if is_range_end is None else (timestamp + is_range_end) / 2
     path = resolve_video_path(video_id)
     frames = extract_frames(path)
     closest = min(frames, key=lambda f: abs(f[0] - target_ts))
     image = closest[1]
 
-    text_inputs = processor(text=labels, padding="max_length", truncation=True, max_length=64, return_tensors="pt")
-    image_inputs = processor(images=[image], return_tensors="pt")
+    text_inputs = processor(text=labels, padding="max_length", truncation=True, max_length=64, return_tensors="pt").to(device)
+    image_inputs = processor(images=[image], return_tensors="pt").to(device)
     with torch.no_grad():
         text_out = model.get_text_features(**text_inputs)
         image_out = model.get_image_features(**image_inputs)

@@ -10,10 +10,10 @@ from core.video_io import extract_frames
 
 @spaces.GPU(duration=60)
 def _visual_frame_search(query: str, top_k: int = 5) -> list:
-    model, processor = load_siglip()
+    model, processor, device = load_siglip()
     text_inputs = processor(
         text=[f"a video of {query}"], padding="max_length", truncation=True, max_length=64, return_tensors="pt"
-    )
+    ).to(device)
     with torch.no_grad():
         text_out = model.get_text_features(**text_inputs)
         text_emb = text_out / text_out.norm(dim=-1, keepdim=True)
@@ -27,12 +27,13 @@ def _visual_frame_search(query: str, top_k: int = 5) -> list:
         timestamps = [t for t, _ in frames]
         images = [f for _, f in frames]
         image_inputs = processor(images=images, return_tensors="pt")
+        image_inputs = image_inputs.to(device)
         with torch.no_grad():
             image_out = model.get_image_features(**image_inputs)
             image_emb = image_out / image_out.norm(dim=-1, keepdim=True)
         logit_scale = model.logit_scale.exp()
         logit_bias = model.logit_bias
-        scores = torch.sigmoid((image_emb @ text_emb.T * logit_scale + logit_bias)).squeeze(-1).detach().numpy()
+        scores = torch.sigmoid((image_emb @ text_emb.T * logit_scale + logit_bias)).squeeze(-1).detach().cpu().numpy()
 
         scored = sorted(zip(timestamps, scores.tolist()), key=lambda x: x[0])
         clusters, threshold = [], 0.3
