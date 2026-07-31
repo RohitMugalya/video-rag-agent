@@ -2,7 +2,7 @@ import os
 
 import gradio as gr
 
-from core.session import fixed_video_ids, save_uploaded_video, session_video_ids
+from core.session import fixed_video_ids, get_session_upload_dir, save_uploaded_video, session_video_ids
 from core.video_io import VIDEO_EXTENSIONS
 
 
@@ -46,7 +46,7 @@ def _render_sample_videos():
 
 
 def _render_session_videos(session_id):
-    upload_dir = os.path.join(os.path.expanduser("~"), "AppData", "Local", "Temp", "video_rag_sessions", session_id)
+    upload_dir = get_session_upload_dir(session_id)
     if not os.path.isdir(upload_dir):
         return "<div style='color:#6b7280;'>No videos yet.</div>"
     return _build_video_grid(session_video_ids(session_id), upload_dir)
