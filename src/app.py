@@ -63,6 +63,13 @@ with gr.Blocks(
         font-size: 0.95rem;
         margin-top: 6px;
     }
+    .audio-guide-wrapper .gradio-audio {
+        max-width: 100%;
+        overflow: hidden;
+    }
+    .audio-guide-wrapper .gradio-audio .wrap {
+        overflow: hidden !important;
+    }
     """,
 ) as demo:
     gr.Markdown("# Video-RAG Agent")
