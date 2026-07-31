@@ -18,3 +18,4 @@ easyocr
 einops
 ftfy
 timm
+requests

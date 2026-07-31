@@ -9,6 +9,7 @@ load_dotenv()
 
 import gradio as gr
 
+from core.assets_fetch import fetch_demo_assets
 from core.models import warm_up_models
 from src.components.audio_guide import render_audio_guide
 from src.components.chat_tab import chat_respond, render_chat_components, retry_response
@@ -16,6 +17,8 @@ from src.components.library_tab import render_library_tab
 from src.components.sidebar import render_sidebar
 from src.components.trace_tab import render_trace_tab_components
 
+print("Fetching demo assets before serving traffic...")
+fetch_demo_assets()
 print("Warming up models before serving traffic...")
 warm_up_models()
 print("All models ready.")
