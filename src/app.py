@@ -73,6 +73,9 @@ with gr.Blocks(
     """,
 ) as demo:
     gr.Markdown("# Video-RAG Agent")
+    gr.Markdown(
+        "Ask natural-language questions about your videos — Video-RAG searches spoken dialogue, visuals, on-screen text, and motion across your library — chaining tools together when a question needs more than one — to find and verify the answer."
+    )
     render_audio_guide()
 
     with gr.Row():
