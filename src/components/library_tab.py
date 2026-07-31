@@ -2,7 +2,6 @@ import gradio as gr
 
 from core.session import (
     fixed_video_ids,
-    get_session_upload_dir,
     resolve_video_path,
     save_uploaded_video,
     session_video_ids,
@@ -10,41 +9,62 @@ from core.session import (
 from core.video_io import VIDEO_EXTENSIONS
 
 
-def _gallery_paths(video_ids, session_id=None):
-    paths = []
+def _gallery_items(video_ids, session_id=None):
+    items = []
     for video_id in video_ids:
         try:
-            paths.append(resolve_video_path(video_id, session_id))
+            path = resolve_video_path(video_id, session_id)
+            items.append((path, video_id))
         except FileNotFoundError:
             continue
-    return paths
+    return items
 
 
 def render_library_tab():
-    gr.Markdown("### Video Library")
+    gr.Markdown("### Video Library", elem_classes=["library-heading"])
 
-    gr.Markdown("**Pre-loaded sample videos**")
-    sample_gallery = gr.Gallery(
-        value=_gallery_paths(fixed_video_ids()),
-        columns=2,
-        object_fit="cover",
-        height=320,
-    )
+    with gr.Column(elem_classes=["library-panel"]):
+        gr.Markdown("**Pre-loaded sample videos**", elem_classes=["library-section-title"])
+        sample_gallery = gr.Gallery(
+            value=_gallery_items(fixed_video_ids()),
+            columns=3,
+            object_fit="cover",
+            height=360,
+            show_label=True,
+            elem_classes=["library-gallery"],
+        )
 
-    gr.Markdown("**Your uploaded videos (this session only)**")
-    session_gallery = gr.Gallery(
-        columns=2,
-        object_fit="cover",
-        height=320,
-    )
+        gr.Markdown("**Your uploaded videos (this session only)**", elem_classes=["library-section-title"])
+        session_gallery = gr.Gallery(
+            value=[],
+            columns=3,
+            object_fit="cover",
+            height=360,
+            show_label=True,
+            elem_classes=["library-gallery"],
+        )
 
-    uploader = gr.File(label="Add a video to your session", file_types=list(VIDEO_EXTENSIONS))
+        upload_status = gr.Markdown(
+            "Upload one or more videos to build your session library.",
+            elem_classes=["library-helper"],
+        )
+        uploader = gr.Files(
+            label="Upload more videos",
+            file_types=list(VIDEO_EXTENSIONS),
+            file_count="multiple",
+            elem_classes=["library-upload"],
+        )
 
-    def _on_upload(file, request: gr.Request):
-        if file is not None:
-            save_uploaded_video(file, request.session_hash)
-        return _gallery_paths(session_video_ids(request.session_hash), request.session_hash)
+        def _on_upload(files, request: gr.Request):
+            if files:
+                for file_path in files:
+                    save_uploaded_video(file_path, request.session_hash)
+                message = f"Added {len(files)} video(s) to your session."
+            else:
+                message = "No new videos were uploaded."
+            updated_items = _gallery_items(session_video_ids(request.session_hash), request.session_hash)
+            return updated_items, message
 
-    uploader.upload(_on_upload, inputs=uploader, outputs=session_gallery)
+        uploader.upload(_on_upload, inputs=uploader, outputs=[session_gallery, upload_status])
 
     return sample_gallery, session_gallery

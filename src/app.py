@@ -23,7 +23,48 @@ print("Warming up models before serving traffic...")
 warm_up_models()
 print("All models ready.")
 
-with gr.Blocks(title="Video-RAG Agent") as demo:
+with gr.Blocks(
+    title="Video-RAG Agent",
+    css="""
+    body { background: linear-gradient(135deg, #07111f 0%, #111c2f 100%); }
+    .gradio-container { max-width: 1600px !important; }
+    .library-panel {
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 20px;
+        padding: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+    .library-heading {
+        margin-bottom: 8px;
+    }
+    .library-section-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    .library-gallery {
+        border-radius: 16px;
+        overflow: hidden;
+    }
+    .library-gallery .gallery-item {
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid rgba(255,255,255,0.12);
+    }
+    .library-upload {
+        border: 1px dashed rgba(255,255,255,0.24);
+        border-radius: 14px;
+        padding: 8px;
+        background: rgba(255,255,255,0.04);
+    }
+    .library-helper {
+        color: #c7d2fe;
+        font-size: 0.95rem;
+        margin-top: 6px;
+    }
+    """,
+) as demo:
     gr.Markdown("# Video-RAG Agent")
     render_audio_guide()
 
