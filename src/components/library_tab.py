@@ -5,6 +5,8 @@ import gradio as gr
 from core.session import fixed_video_ids, get_session_upload_dir, save_uploaded_video, session_video_ids
 from core.video_io import VIDEO_EXTENSIONS
 
+ASSETS_VIDEO_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "videos")
+
 
 def _resolve_video_path(base_dir, video_id):
     for ext in VIDEO_EXTENSIONS:
@@ -14,58 +16,33 @@ def _resolve_video_path(base_dir, video_id):
     return None
 
 
-def _build_video_grid(video_ids, base_dir):
-    if not video_ids:
-        return "<div style='color:#6b7280;'>No videos yet.</div>"
-
-    items = []
-    for video_id in video_ids:
-        video_path = _resolve_video_path(base_dir, video_id)
-        if video_path is None:
-            continue
-        items.append(
-            f"<div style='border:1px solid #d1d5db;border-radius:8px;padding:8px;background:#fff;'>"
-            f"<video controls preload='metadata' style='width:100%;max-height:220px;border-radius:6px;'><source src='{video_path}'></video>"
-            f"<div style='margin-top:6px;font-weight:600;'>{video_id}</div>"
-            f"</div>"
-        )
-
-    if not items:
-        return "<div style='color:#6b7280;'>No videos yet.</div>"
-
-    return (
-        "<div style='display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;'>"
-        + "".join(items)
-        + "</div>"
-    )
-
-
-def _render_sample_videos():
-    base_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "assets", "videos")
-    return _build_video_grid(fixed_video_ids(), base_dir)
-
-
-def _render_session_videos(session_id):
-    upload_dir = get_session_upload_dir(session_id)
-    if not os.path.isdir(upload_dir):
-        return "<div style='color:#6b7280;'>No videos yet.</div>"
-    return _build_video_grid(session_video_ids(session_id), upload_dir)
+def _library_gallery(video_ids, base_dir):
+    return [
+        _resolve_video_path(base_dir, video_id)
+        for video_id in video_ids
+        if _resolve_video_path(base_dir, video_id) is not None
+    ]
 
 
 def _on_upload(file, request: gr.Request):
     if file is not None:
         save_uploaded_video(file, request.session_hash)
-    return _render_session_videos(request.session_hash)
+    upload_dir = get_session_upload_dir(request.session_hash)
+    return gr.Gallery.update(value=_library_gallery(session_video_ids(request.session_hash), upload_dir), columns=2, object_fit="cover")
 
 
 def render_library_tab():
     gr.Markdown("### Video Library")
 
     gr.Markdown("**Pre-loaded sample videos**")
-    gr.HTML(value=_render_sample_videos())
+    sample_gallery = gr.Gallery(
+        value=_library_gallery(fixed_video_ids(), ASSETS_VIDEO_DIR),
+        columns=2,
+        object_fit="cover",
+    )
 
     gr.Markdown("**Your uploaded videos (this session only)**")
-    session_videos = gr.HTML(value="<div style='color:#6b7280;'>No videos yet.</div>")
+    session_gallery = gr.Gallery(columns=2, object_fit="cover")
 
     uploader = gr.File(label="Add a video to your session", file_types=list(VIDEO_EXTENSIONS))
-    uploader.upload(_on_upload, inputs=uploader, outputs=session_videos)
+    uploader.upload(_on_upload, inputs=uploader, outputs=session_gallery)
