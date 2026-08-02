@@ -1,12 +1,20 @@
 import torch
 from langchain_core.tools import tool
 
+try:
+    import spaces
+except Exception:
+    spaces = None
+
 from core.models import load_siglip, run_with_gpu_fallback
+
+_gpu_decorator = spaces.GPU(duration=30) if spaces is not None and hasattr(spaces, "GPU") else (lambda f: f)
 from core.prompt_loader import load_prompt
 from core.session import resolve_video_path
 from core.video_io import extract_frames
 
 
+@_gpu_decorator
 def _zero_shot_classify_gpu(video_id: str, timestamp: float, labels: list, is_range_end: float = None) -> dict:
     model, processor, device = load_siglip()
     target_ts = timestamp if is_range_end is None else (timestamp + is_range_end) / 2

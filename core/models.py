@@ -23,15 +23,9 @@ _MODEL_CACHE = {}
 def _cuda_is_usable():
     if not torch.cuda.is_available():
         return False
-
     if os.environ.get("SPACE_ID") and not os.environ.get("CUDA_VISIBLE_DEVICES") and not os.environ.get("NVIDIA_VISIBLE_DEVICES"):
         return False
-
-    try:
-        torch.zeros(1).cuda()
-        return True
-    except Exception:
-        return False
+    return True
 
 
 def _get_device():

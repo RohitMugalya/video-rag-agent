@@ -1,7 +1,14 @@
 import torch
 from langchain_core.tools import tool
 
+try:
+    import spaces
+except Exception:
+    spaces = None
+
 from core.models import load_viclip, run_with_gpu_fallback
+
+_gpu_decorator = spaces.GPU(duration=120) if spaces is not None and hasattr(spaces, "GPU") else (lambda f: f)
 from core.prompt_loader import load_prompt
 from core.session import library_video_ids, resolve_video_path
 from core.video_io import frames2tensor, get_raw_frames
@@ -9,6 +16,7 @@ from core.video_io import frames2tensor, get_raw_frames
 DISTRACTOR_ACTIONS = ["a person standing still", "an empty scene with no activity", "a static parked scene"]
 
 
+@_gpu_decorator
 def _motion_search_gpu(query: str, top_k: int = 5) -> dict:
     clip, tokenizer, device = load_viclip()
     candidates = [query] + [d for d in DISTRACTOR_ACTIONS if d != query]

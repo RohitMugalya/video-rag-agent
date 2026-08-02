@@ -1,12 +1,20 @@
 import torch
 from langchain_core.tools import tool
 
+try:
+    import spaces
+except Exception:
+    spaces = None
+
 from core.models import load_siglip, run_with_gpu_fallback
+
+_gpu_decorator = spaces.GPU(duration=60) if spaces is not None and hasattr(spaces, "GPU") else (lambda f: f)
 from core.prompt_loader import load_prompt
 from core.session import library_video_ids, resolve_video_path
 from core.video_io import extract_frames
 
 
+@_gpu_decorator
 def _visual_frame_search_gpu(query: str, top_k: int = 5) -> dict:
     model, processor, device = load_siglip()
     text_inputs = processor(
