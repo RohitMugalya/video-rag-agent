@@ -1,6 +1,12 @@
 import os
 
+import torch
+
 _MODEL_CACHE = {}
+
+
+def _get_device():
+    return "cuda" if torch.cuda.is_available() else "cpu"
 
 
 def load_siglip():
@@ -8,13 +14,16 @@ def load_siglip():
         from transformers import AutoModel, AutoProcessor
 
         model = AutoModel.from_pretrained("google/siglip2-base-patch16-224").eval()
-        model = model.to("cuda")
+        device = _get_device()
+        model = model.to(device)
         processor = AutoProcessor.from_pretrained("google/siglip2-base-patch16-224")
-        _MODEL_CACHE["siglip"] = (model, processor, "cuda")
+        _MODEL_CACHE["siglip"] = (model, processor, device)
     return _MODEL_CACHE["siglip"]
 
 
 def run_with_gpu_fallback(gpu_fn, cpu_fn):
+    if not torch.cuda.is_available():
+        return cpu_fn(), True
     try:
         return gpu_fn(), False
     except RuntimeError as e:
@@ -63,9 +72,21 @@ def load_viclip():
         with open(config_path, "w") as f:
             json.dump(config, f)
         model = AutoModel.from_pretrained(local_dir, trust_remote_code=True)
-        model = model.to("cuda").eval()
-        _MODEL_CACHE["viclip"] = (model, model.tokenizer, "cuda")
+        device = _get_device()
+        model = model.to(device).eval()
+        _MODEL_CACHE["viclip"] = (model, model.tokenizer, device)
     return _MODEL_CACHE["viclip"]
+
+
+def optional_spaces_gpu(duration):
+    import spaces
+
+    def decorator(func):
+        if not torch.cuda.is_available():
+            return func
+        return spaces.GPU(duration=duration)(func)
+
+    return decorator
 
 
 MODEL_LOADERS = {

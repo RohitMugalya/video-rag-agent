@@ -2,7 +2,7 @@ import spaces
 import torch
 from langchain_core.tools import tool
 
-from core.models import load_viclip, run_with_gpu_fallback
+from core.models import load_viclip, optional_spaces_gpu, run_with_gpu_fallback
 from core.prompt_loader import load_prompt
 from core.session import library_video_ids, resolve_video_path
 from core.video_io import frames2tensor, get_raw_frames
@@ -10,7 +10,7 @@ from core.video_io import frames2tensor, get_raw_frames
 DISTRACTOR_ACTIONS = ["a person standing still", "an empty scene with no activity", "a static parked scene"]
 
 
-@spaces.GPU(duration=120)
+@optional_spaces_gpu(duration=120)
 def _motion_search_gpu(query: str, top_k: int = 5) -> dict:
     clip, tokenizer, device = load_viclip()
     candidates = [query] + [d for d in DISTRACTOR_ACTIONS if d != query]

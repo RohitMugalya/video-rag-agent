@@ -2,13 +2,13 @@ import spaces
 import torch
 from langchain_core.tools import tool
 
-from core.models import load_siglip, run_with_gpu_fallback
+from core.models import load_siglip, optional_spaces_gpu, run_with_gpu_fallback
 from core.prompt_loader import load_prompt
 from core.session import library_video_ids, resolve_video_path
 from core.video_io import extract_frames
 
 
-@spaces.GPU(duration=60)
+@optional_spaces_gpu(duration=60)
 def _visual_frame_search_gpu(query: str, top_k: int = 5) -> dict:
     model, processor, device = load_siglip()
     text_inputs = processor(
