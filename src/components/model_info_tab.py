@@ -1,21 +1,67 @@
 import gradio as gr
 
 
-LOCAL_MODELS_TABLE = """
-| Tool | Model | Size | Accuracy | Notes |
-|---|---|---|---|---|
-| `transcript_search` | Whisper `base` (via faster-whisper) | 74M params | WER 5.0% / 12.4% (LibriSpeech test-clean / test-other) | Matching is literal keyword overlap against the transcript, not semantic search. |
-| `visual_frame_search`, `zero_shot_classify` | SigLIP2 (`google/siglip2-base-patch16-224`) | ~375MB checkpoint (~92M-param vision tower + text tower) | Top-1 70.79% / Top-5 93.27% (ImageNet zero-shot) | One shared model powers both static-appearance search and label scoring. |
-| `motion_search` | ViCLIP-L-14 (`OpenGVLab/ViCLIP-L-14-hf`) | 0.4B params | 75.7% top-1 (zero-shot action recognition, Kinetics-400) | Published research benchmark from the InternVid paper — not independently re-verified on this project's videos. |
-| `ocr_read` | EasyOCR (CRAFT detector + English recognizer) | ~98MB (83MB detector + 15MB recognizer) | No single published figure | OCR accuracy swings heavily with text size, lighting, and camera angle — independent comparisons place EasyOCR as a solid lightweight option, generally a step behind larger VLM-based OCR on difficult real-world images. |
-"""
+LOCAL_MODELS = [
+    {
+        "tool": "transcript_search",
+        "model": "Whisper base (faster-whisper)",
+        "size": "74M params",
+        "accuracy": "WER 5.0% / 12.4% (LibriSpeech)",
+        "notes": "Matching is literal keyword overlap against the transcript, not semantic search.",
+    },
+    {
+        "tool": "visual_frame_search, zero_shot_classify",
+        "model": "SigLIP2 (google/siglip2-base-patch16-224)",
+        "size": "~375MB checkpoint",
+        "accuracy": "Top-1 70.79% / Top-5 93.27% (ImageNet zero-shot)",
+        "notes": "One shared model powers both static-appearance search and label scoring.",
+    },
+    {
+        "tool": "motion_search",
+        "model": "ViCLIP-L-14 (OpenGVLab/ViCLIP-L-14-hf)",
+        "size": "0.4B params",
+        "accuracy": "75.7% top-1 (zero-shot action recognition, Kinetics-400)",
+        "notes": "Published benchmark from the InternVid paper; not independently re-verified on this project’s videos.",
+    },
+    {
+        "tool": "ocr_read",
+        "model": "EasyOCR (CRAFT + English recognizer)",
+        "size": "~98MB total",
+        "accuracy": "No single published figure",
+        "notes": "Accuracy depends heavily on text size, lighting, and camera angle.",
+    },
+]
 
-AGENT_MODELS_TABLE = """
-| Role | Model | Size | Benchmark | Notes |
-|---|---|---|---|---|
-| Agent orchestrator (plans and calls tools) | `openai/gpt-oss-120b` | 116.8B total params, 5.1B active per token (MoE) | MMLU 90%, GPQA Diamond 80.1% | Swappable from the sidebar; this is the default. |
-| Vision-language model (`verify_visual_claim`, `describe_visual_attribute`) | `qwen/qwen3.6-27b` | 27B params (dense, multimodal) | ~84.5% MMLU (community-measured; no official first-party figure published) | Also swappable from the sidebar; this is the default. |
-"""
+AGENT_MODELS = [
+    {
+        "role": "Agent orchestrator",
+        "model": "openai/gpt-oss-120b",
+        "size": "116.8B total params",
+        "benchmark": "MMLU 90%, GPQA Diamond 80.1%",
+        "notes": "Swappable from the sidebar; this is the default.",
+    },
+    {
+        "role": "Vision-language model",
+        "model": "qwen/qwen3.6-27b",
+        "size": "27B params",
+        "benchmark": "~84.5% MMLU (community-measured)",
+        "notes": "Used for verify_visual_claim and describe_visual_attribute; also swappable from the sidebar.",
+    },
+]
+
+
+def _render_model_cards(models, title):
+    with gr.Column():
+        gr.Markdown(f"**{title}**")
+        for model in models:
+            with gr.Group():
+                gr.Markdown(f"### {model['tool'] if 'tool' in model else model['role']}")
+                gr.Markdown(
+                    f"**Model:** {model['model']}  \n"
+                    f"**Size:** {model['size']}  \n"
+                    f"**Accuracy / Benchmark:** {model['accuracy'] if 'accuracy' in model else model['benchmark']}  \n"
+                    f"**Notes:** {model['notes']}"
+                )
 
 
 def render_model_info_tab():
@@ -27,11 +73,11 @@ def render_model_info_tab():
         "this project's own video library."
     )
 
-    gr.Markdown("**Per-tool local models** (run directly on this Space)")
-    gr.Markdown(LOCAL_MODELS_TABLE)
-
-    gr.Markdown("**Agent & reasoning models** (called via API)")
-    gr.Markdown(AGENT_MODELS_TABLE)
+    with gr.Row(equal_height=True):
+        with gr.Column(scale=1):
+            _render_model_cards(LOCAL_MODELS, "Per-tool local models (run directly on this Space)")
+        with gr.Column(scale=1):
+            _render_model_cards(AGENT_MODELS, "Agent & reasoning models (called via API)")
 
     gr.Markdown(
         "_Note: this project runs entirely on free-tier infrastructure — Hugging Face "
