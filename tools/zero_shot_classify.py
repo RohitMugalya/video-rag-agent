@@ -59,6 +59,8 @@ def _zero_shot_classify(video_id: str, timestamp: float, labels: list, is_range_
         lambda: _zero_shot_classify_cpu(video_id, timestamp, labels, is_range_end),
     )
     result["ran_on_cpu"] = used_cpu_fallback or result.get("ran_on_cpu", False)
+    if result.get("ran_on_cpu"):
+        result["note"] = "GPU is currently unavailable, so this classification ran on CPU."
     return result
 
 

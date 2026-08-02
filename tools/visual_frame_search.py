@@ -113,6 +113,8 @@ def _visual_frame_search(query: str, top_k: int = 5) -> dict:
         lambda: _visual_frame_search_cpu(query, top_k),
     )
     result["ran_on_cpu"] = used_cpu_fallback or result.get("ran_on_cpu", False)
+    if result.get("ran_on_cpu"):
+        result["note"] = "GPU is currently unavailable, so this search ran on CPU."
     return result
 
 
