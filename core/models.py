@@ -2,6 +2,21 @@ import os
 
 import torch
 
+try:
+    import spaces
+except Exception:  # pragma: no cover - local/dev environments may not have spaces installed
+    spaces = None
+
+
+if spaces is not None and hasattr(spaces, "GPU"):
+    @spaces.GPU(duration=1)
+    def _spaces_runtime_marker():
+        return "spaces-runtime-marker"
+else:
+    def _spaces_runtime_marker():
+        return "spaces-runtime-marker"
+
+
 _MODEL_CACHE = {}
 
 
