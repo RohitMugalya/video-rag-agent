@@ -20,8 +20,18 @@ else:
 _MODEL_CACHE = {}
 
 
+def _cuda_is_usable():
+    if not torch.cuda.is_available():
+        return False
+    try:
+        torch.zeros(1).cuda()
+        return True
+    except Exception:
+        return False
+
+
 def _get_device():
-    return "cuda" if torch.cuda.is_available() else "cpu"
+    return "cuda" if _cuda_is_usable() else "cpu"
 
 
 def load_siglip():
@@ -37,12 +47,13 @@ def load_siglip():
 
 
 def run_with_gpu_fallback(gpu_fn, cpu_fn):
-    if not torch.cuda.is_available():
+    if not _cuda_is_usable():
         return cpu_fn(), True
     try:
         return gpu_fn(), False
     except RuntimeError as e:
-        if "No CUDA GPUs are available" in str(e):
+        msg = str(e)
+        if "No CUDA GPUs are available" in msg or "Low-level CUDA init" in msg or "CUDA emulation" in msg or "CUDA" in msg and "init" in msg:
             return cpu_fn(), True
         raise
 
