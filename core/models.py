@@ -47,13 +47,23 @@ def load_siglip():
 def run_with_gpu_fallback(gpu_fn, cpu_fn):
     if not _cuda_is_usable():
         return cpu_fn(), True
-    try:
-        return gpu_fn(), False
-    except RuntimeError as e:
-        msg = str(e)
-        if "No CUDA GPUs are available" in msg or "Low-level CUDA init" in msg or "CUDA emulation" in msg or "CUDA" in msg and "init" in msg:
-            return cpu_fn(), True
-        raise
+
+    gpu_error_markers = ("No CUDA GPUs are available", "Low-level CUDA init", "CUDA emulation", "worker_init")
+
+    for attempt in range(2):
+        try:
+            return gpu_fn(), False
+        except Exception as e:
+            msg = str(e)
+            if any(marker in msg for marker in gpu_error_markers):
+                if attempt == 0:
+                    print(f"GPU allocation failed (attempt 1), retrying: {msg}")
+                    continue
+                print(f"GPU allocation failed again, falling back to CPU: {msg}")
+                return cpu_fn(), True
+            raise
+
+    return cpu_fn(), True
 
 
 def load_ocr():
