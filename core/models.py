@@ -78,17 +78,6 @@ def load_viclip():
     return _MODEL_CACHE["viclip"]
 
 
-def optional_spaces_gpu(duration):
-    import spaces
-
-    def decorator(func):
-        if not torch.cuda.is_available():
-            return func
-        return spaces.GPU(duration=duration)(func)
-
-    return decorator
-
-
 MODEL_LOADERS = {
     "SigLIP2 (visual search)": load_siglip,
     "EasyOCR (on-screen text)": load_ocr,
