@@ -14,6 +14,7 @@ from core.models import warm_up_models
 from src.components.audio_guide import render_audio_guide
 from src.components.chat_tab import chat_respond, render_chat_components, retry_response
 from src.components.library_tab import render_library_tab
+from src.components.model_info_tab import render_model_info_tab
 from src.components.sidebar import render_sidebar
 from src.components.trace_tab import render_trace_tab_components
 
@@ -90,6 +91,8 @@ with gr.Blocks(
                     trace_output = render_trace_tab_components()
                 with gr.Tab("Video Library"):
                     render_library_tab()
+                with gr.Tab("Model Information"):
+                    render_model_info_tab()
 
     msg.submit(
         chat_respond,
