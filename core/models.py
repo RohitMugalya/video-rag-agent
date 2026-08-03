@@ -48,22 +48,14 @@ def run_with_gpu_fallback(gpu_fn, cpu_fn):
     if not _cuda_is_usable():
         return cpu_fn(), True
 
-    gpu_error_markers = ("No CUDA GPUs are available", "Low-level CUDA init", "CUDA emulation", "worker_init")
-
     for attempt in range(2):
         try:
             return gpu_fn(), False
         except Exception as e:
-            msg = str(e)
-            if any(marker in msg for marker in gpu_error_markers):
-                if attempt == 0:
-                    print(f"GPU allocation failed (attempt 1), retrying: {msg}")
-                    continue
-                print(f"GPU allocation failed again, falling back to CPU: {msg}")
+            print(f"GPU attempt {attempt + 1} failed ({type(e).__name__}): {e}")
+            if attempt == 1:
+                print("Falling back to CPU.")
                 return cpu_fn(), True
-            raise
-
-    return cpu_fn(), True
 
 
 def load_ocr():
