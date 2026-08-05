@@ -1,0 +1,17 @@
+Hi! Welcome to the Video RAG Agent. — — —
+
+So... this project is a video retrieval agent. Whatever you're looking for — a static frame, a motion or action, on-screen text, or something someone spoke — this agent can find it, using the respective tools it has access to. You just ask, in plain English, and it figures out which tools to reach for on its own.
+
+Here's how to get started. — — —
+
+First... head over to the 'Video Library' tab. You can upload your own video... or if you want to get started right away, just experiment with the default sample videos.
+
+Next... hop into the 'Chat' tab and just type your question, Something like... "Which video has red color car?"... ... or "What sign is displayed on the banner outside the shop?" — — — If a question needs a couple of steps — like locating a moment first, and then analyzing them — it'll chain those together for you, no extra instructions needed.
+
+While it's working, flip over to the 'Tool Trace' tab if you're curious what it's actually doing behind the scenes — — every tool it called, what arguments it used, and what came back. It's a nice window into the reasoning, not just the final answer.
+
+Up in the sidebar, you can pick which language model drives the agent, and which vision model handles the trickier visual questions. Everything here runs on free-tier infrastructure, so... every once in a while a call might fail or run a little slow — if that happens, you'll see a clear error message, and there's a retry button right there to just try again.
+
+And make sure to check out the 'Model Information' tab — it lays out exactly what model powers what tool, at each stage.
+
+So yeah... go ahead and ask it something. Have fun exploring your videos!
