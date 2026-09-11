@@ -8,3 +8,6 @@ sdk_version: 5.50.0
 app_file: src/app.py
 pinned: false
 ---
+
+
+![thumbnail](assets/thumbnails/thumbnail-agent-head.png)
