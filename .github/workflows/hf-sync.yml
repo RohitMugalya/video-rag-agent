@@ -15,9 +15,9 @@ jobs:
 
       - name: Build assets-free deploy snapshot
         run: |
-          rm -rf assets/videos assets/audios
-          mkdir -p assets/videos assets/audios
-          touch assets/videos/.gitkeep assets/audios/.gitkeep
+          rm -rf assets/videos assets/audios assets/thumbnails
+          mkdir -p assets/videos assets/audios assets/thumbnails
+          touch assets/videos/.gitkeep assets/audios/.gitkeep assets/thumbnails/.gitkeep
           git checkout --orphan hf-deploy
           git add -A
           git -c user.email="actions@github.com" -c user.name="GitHub Actions" \
