@@ -19,3 +19,4 @@ einops
 ftfy
 timm
 requests
+setuptools<82
