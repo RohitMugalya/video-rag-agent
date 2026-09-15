@@ -8,7 +8,6 @@ sdk_version: 5.50.0
 python_version: "3.10"
 app_file: src/app.py
 pinned: false
-short_description: Ask questions about your videos in plain English — a multi-modal retrieval agent
 ---
 
 # Video-RAG Agent
